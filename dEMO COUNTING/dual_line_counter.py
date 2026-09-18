@@ -63,9 +63,15 @@ class SingleLineCounter:
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         timestamp DATETIME DEFAULT (datetime('now', 'localtime')),
                         event_type TEXT,
-                        track_id INTEGER
+                        track_id INTEGER,
+                        is_ghost INTEGER DEFAULT 0
                     )
                 ''')
+                # Migrate existing DB: add is_ghost column if it doesn't exist yet
+                try:
+                    cursor.execute("ALTER TABLE events ADD COLUMN is_ghost INTEGER DEFAULT 0")
+                except Exception:
+                    pass  # Column already exists — safe to ignore
                 # Table for live active tracks tracking — store local time
                 cursor.execute('''
                     CREATE TABLE IF NOT EXISTS live_status (

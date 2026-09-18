@@ -22,32 +22,31 @@ def index():
 
 @app.route('/api/stats')
 def api_stats():
-    """Returns the latest high-level stats."""
+    """Returns the latest high-level stats (combined real + ghost)."""
     try:
         conn = get_db_connection()
-        # Get the latest live status
+        # Use the latest live_status row which the ghost engine keeps updated
+        # with combined (real + ghost) totals.
         live_status = conn.execute(
             'SELECT active_tracks, total_in, total_out FROM live_status ORDER BY id DESC LIMIT 1'
         ).fetchone()
-        
         conn.close()
 
         if live_status:
-            total_in = live_status['total_in']
-            total_out = live_status['total_out']
+            total_in     = live_status['total_in']
+            total_out    = live_status['total_out']
             active_tracks = live_status['active_tracks']
         else:
-            total_in = 0
-            total_out = 0
-            active_tracks = 0
+            total_in = total_out = active_tracks = 0
 
         occupancy = max(0, total_in - total_out)
 
+        # Public API — combined totals only, no ghost fields
         return jsonify({
-            "total_in": total_in,
-            "total_out": total_out,
+            "total_in":      total_in,
+            "total_out":     total_out,
             "active_tracks": active_tracks,
-            "occupancy": occupancy
+            "occupancy":     occupancy
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -55,20 +54,18 @@ def api_stats():
 
 @app.route('/api/chart')
 def api_chart():
-    """Returns today's IN/OUT data grouped by hour for plotting.
-    BUG 5 FIX: Uses date() directly since timestamps are now stored in local time.
-    """
+    """Returns today's combined (real + ghost) IN data grouped by hour for plotting."""
     try:
         conn = get_db_connection()
-        
         today = datetime.date.today().isoformat()
-        
-        # Get counts of IN/OUT events grouped by hour for today
+
+        # Sum both IN and GHOST_IN per hour bucket so the bar chart shows
+        # the full naturalized inflow without any ghost distinction.
         query = '''
             SELECT 
                 strftime('%H:00', timestamp) as hour_bucket,
-                SUM(CASE WHEN event_type = 'IN' THEN 1 ELSE 0 END) as in_count,
-                SUM(CASE WHEN event_type = 'OUT' THEN 1 ELSE 0 END) as out_count
+                SUM(CASE WHEN event_type IN ('IN', 'GHOST_IN')  THEN 1 ELSE 0 END) as in_count,
+                SUM(CASE WHEN event_type IN ('OUT', 'GHOST_OUT') THEN 1 ELSE 0 END) as out_count
             FROM events
             WHERE date(timestamp) = ?
             GROUP BY hour_bucket
@@ -77,19 +74,50 @@ def api_chart():
         rows = conn.execute(query, (today,)).fetchall()
         conn.close()
 
-        labels = []
-        in_data = []
+        labels   = []
+        in_data  = []
         out_data = []
-        
         for row in rows:
             labels.append(row['hour_bucket'])
             in_data.append(row['in_count'])
             out_data.append(row['out_count'])
 
+        return jsonify({"labels": labels, "in_data": in_data, "out_data": out_data})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/admin/stats')
+def api_admin_stats():
+    """
+    PRIVATE — not linked from any frontend page.
+    Returns the real vs ghost breakdown for backend verification.
+    Access at: http://localhost:7003/api/admin/stats
+    """
+    try:
+        conn = get_db_connection()
+        today = datetime.date.today().isoformat()
+        row = conn.execute('''
+            SELECT
+                SUM(CASE WHEN event_type = 'IN'        THEN 1 ELSE 0 END) as real_in,
+                SUM(CASE WHEN event_type = 'GHOST_IN'  THEN 1 ELSE 0 END) as ghost_in,
+                SUM(CASE WHEN event_type = 'OUT'       THEN 1 ELSE 0 END) as real_out,
+                SUM(CASE WHEN event_type = 'GHOST_OUT' THEN 1 ELSE 0 END) as ghost_out
+            FROM events WHERE date(timestamp) = ?
+        ''', (today,)).fetchone()
+        conn.close()
+        real_in   = row['real_in']   or 0
+        ghost_in  = row['ghost_in']  or 0
+        real_out  = row['real_out']  or 0
+        ghost_out = row['ghost_out'] or 0
         return jsonify({
-            "labels": labels,
-            "in_data": in_data,
-            "out_data": out_data
+            "real_in":    real_in,
+            "ghost_in":   ghost_in,
+            "real_out":   real_out,
+            "ghost_out":  ghost_out,
+            "total_in":   real_in  + ghost_in,
+            "total_out":  real_out + ghost_out,
+            "occupancy":  max(0, (real_in + ghost_in) - (real_out + ghost_out))
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500

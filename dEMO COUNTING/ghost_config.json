@@ -1,0 +1,10 @@
+{
+    "ghost_mode_enabled": true,
+    "event_start_date": "2026-09-18",
+    "day_offsets": [4000, 3000, 2000, 1000],
+    "absolute_ceiling": 12000,
+    "activity_window_seconds": 10,
+    "trigger_threshold_people": 5,
+    "avg_dwell_time_seconds": 300,
+    "dwell_jitter_seconds": 60
+}

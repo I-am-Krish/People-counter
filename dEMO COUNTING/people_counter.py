@@ -145,6 +145,7 @@ def draw_tracking_annotations(frame, detections):
     return frame
 
 from dual_line_counter import SingleLineCounter
+from ghost_engine import GhostEngine
 
 def draw_count_line(frame, line):
     """Draw the single counting line on the frame - bright cyan."""
@@ -209,6 +210,11 @@ def generate_frames():
     print(f"[LINES] Counting line: {line_start} -> {line_end}")
     print(f"[LINES] Frame size: {w}x{h}, base_y={base_y}")
 
+    # ── Ghost Engine ──────────────────────────────────────────────────────────
+    ghost = GhostEngine()
+    ghost.start()
+    prev_real_in = counter.entered_count  # Track delta for ghost notifications
+
     fps = 0.0
     fps_start_time = time.time()
     fps_frame_count = 0
@@ -265,10 +271,20 @@ def generate_frames():
             # State Machine Counting
             counter.update(detections)
 
+            # ── Notify ghost engine on every new real IN crossing ─────────────
+            if counter.entered_count > prev_real_in:
+                for _ in range(counter.entered_count - prev_real_in):
+                    ghost.notify_real_in(counter.entered_count)
+                prev_real_in = counter.entered_count
+
             # BUG 2 FIX: Use separate debug counter that never resets
             debug_frame_count += 1
             if debug_frame_count % 60 == 0:
-                print(f"[DEBUG] Frame {debug_frame_count}: {len(detections)} tracked, IN={counter.entered_count}, OUT={counter.exited_count}, active_tracks={len(counter.tracks)}")
+                ghost_counts = ghost.get_ghost_counts()
+                print(f"[DEBUG] Frame {debug_frame_count}: {len(detections)} tracked, "
+                      f"IN={counter.entered_count}(+{ghost_counts['ghost_in']}ghost), "
+                      f"OUT={counter.exited_count}(+{ghost_counts['ghost_out']}ghost), "
+                      f"active_tracks={len(counter.tracks)}")
                 counter.log_status(len(counter.tracks))
 
             # BUG 2 FIX: FPS uses its own independent counter
@@ -279,11 +295,14 @@ def generate_frames():
                 fps_frame_count = 0
                 fps_start_time = time.time()
 
-            # Annotations
+            # Annotations — combine real + ghost counts for display
+            ghost_counts = ghost.get_ghost_counts()
+            display_in  = counter.entered_count + ghost_counts["ghost_in"]
+            display_out = counter.exited_count  + ghost_counts["ghost_out"]
             annotated = frame.copy()
             annotated = draw_tracking_annotations(annotated, detections)
             annotated = draw_count_line(annotated, counter.line)
-            annotated = draw_counter_overlay(annotated, counter.entered_count, counter.exited_count, fps, len(detections))
+            annotated = draw_counter_overlay(annotated, display_in, display_out, fps, len(detections))
 
             # Encode for web
             ret, buffer = cv2.imencode('.jpg', annotated)
