@@ -1,5 +1,5 @@
 {
-    "ghost_mode_enabled": true,
+    "enabled": false,
     "event_start_date": "2026-09-18",
     "day_offsets": [4000, 3000, 2000, 1000],
     "absolute_ceiling": 12000,

@@ -2,3 +2,5 @@ rfdetr
 supervision
 opencv-python
 numpy
+torch
+flask

@@ -1,6 +1,32 @@
-.venv/
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Model weights & checkpoints
 *.pt
-*.mjpeg
-analytics.db
+*.pth
+*.onnx
 checkpoint_1/
+
+# Database (runtime data, not source)
+analytics.db
+
+# Byte-compiled
+*.mjpeg
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
