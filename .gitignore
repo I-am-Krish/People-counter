@@ -30,3 +30,6 @@ analytics.db
 
 # Logs
 *.log
+
+#tools
+.tools/

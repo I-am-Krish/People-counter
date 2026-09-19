@@ -1,4 +1,4 @@
-# 🎯 People Counter — Real-Time AI Footfall Monitoring
+# People Counter — Real-Time AI Footfall Monitoring
 
 <div align="center">
 
@@ -17,23 +17,23 @@
 
 ---
 
-## 📌 Overview
+## Overview
 
 This system provides real-time, accurate people counting from RTSP camera streams using a cutting-edge transformer-based detector. It has been successfully deployed in high-density crowd environments — tracking over **50,000 people** with sustained **85%+ accuracy** even under challenging overhead camera angles and dense crowd conditions.
 
-### ✨ Key Features
+### Key Features
 
-- **🤖 State-of-the-art Detection** — RF-DETR Large transformer model, GPU-accelerated with FP16 inference
-- **🎯 Robust Tracking** — ByteTrack multi-object tracker with configurable hysteresis dead zone to eliminate false counts
-- **📊 Live Analytics Dashboard** — Beautiful dark-mode web dashboard with real-time charts and crowd capacity meter
-- **🔁 Auto-Reconnect** — Automatically re-establishes RTSP connection if the camera feed drops
-- **💾 Persistent Counts** — SQLite event log preserves counts across restarts — no data loss on reboot
-- **🌐 Network Accessible** — Both the live feed and dashboard are served over HTTP, accessible from any device on the network
-- **⚡ One-Click Launch** — Single script starts both servers on Windows, Linux, and macOS
+- **State-of-the-art Detection** — RF-DETR Large transformer model, GPU-accelerated with FP16 inference
+- **Robust Tracking** — ByteTrack multi-object tracker with configurable hysteresis dead zone to eliminate false counts
+- **Live Analytics Dashboard** — Beautiful dark-mode web dashboard with real-time charts and crowd capacity meter
+- **Auto-Reconnect** — Automatically re-establishes RTSP connection if the camera feed drops
+- **Persistent Counts** — SQLite event log preserves counts across restarts — no data loss on reboot
+- **Network Accessible** — Both the live feed and dashboard are served over HTTP, accessible from any device on the network
+- **One-Click Launch** — Single script starts both servers on Windows, Linux, and macOS
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -82,12 +82,12 @@ The launcher will automatically:
 
 | Service | URL |
 |---|---|
-| 📹 Live annotated feed | `http://localhost:7004` |
-| 📊 Analytics dashboard | `http://localhost:7003` |
+| Live annotated feed | `http://localhost:7004` |
+| Analytics dashboard | `http://localhost:7003` |
 
 ---
 
-## 📊 Analytics Dashboard
+## Analytics Dashboard
 
 The web dashboard provides a real-time overview of footfall:
 
@@ -98,7 +98,7 @@ The web dashboard provides a real-time overview of footfall:
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 All settings are in [`config.py`](config.py):
 
@@ -121,7 +121,7 @@ The counting line position is configured in [`line_config.json`](line_config.jso
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 people_counter.py          ← Main process: RF-DETR inference + ByteTrack + Flask stream (port 7004)
@@ -153,7 +153,7 @@ line_config.json           ← Counting line pixel coordinates
 
 ---
 
-## 🛠️ Developer Tools
+## Developer Tools
 
 The `tools/` directory contains diagnostic scripts for development:
 
@@ -164,7 +164,7 @@ python tools/debug_classes.py
 
 ---
 
-## 📦 Dependencies
+## Dependencies
 
 | Package | Purpose |
 |---|---|
@@ -179,9 +179,3 @@ Install all:
 ```bash
 pip install -r requirements.txt
 ```
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License.
