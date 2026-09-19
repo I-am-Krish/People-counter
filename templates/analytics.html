@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>People Counter | Live Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -189,18 +190,17 @@
 
     <aside class="sidebar">
         <div class="sidebar-logo">
-            <span style="font-size:2.2rem;">📹</span>
+            <i class="fa-solid fa-video" style="font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--accent-orange);"></i>
             <span>People Counter</span>
         </div>
         <ul class="sidebar-nav">
-            <li class="active">📊 Dashboard</li>
-            <li>🎥 Live View</li>
-            <li>📈 Analytics</li>
-            <li>⚙️ Settings</li>
+            <li id="nav-dashboard" class="active"><i class="fa-solid fa-border-all" style="width: 1.2rem; text-align: center;"></i> Dashboard</li>
+            <li id="nav-live"><i class="fa-solid fa-camera" style="width: 1.2rem; text-align: center;"></i> Live View</li>
+            <li id="nav-analytics"><i class="fa-solid fa-chart-line" style="width: 1.2rem; text-align: center;"></i> Analytics</li>
+            <li id="nav-settings"><i class="fa-solid fa-gear" style="width: 1.2rem; text-align: center;"></i> Settings</li>
         </ul>
         <div style="margin-top:auto;text-align:center;color:var(--text-muted);font-size:.75rem;">
-            <p>AI Counting System</p>
-            <p>v2.1.0</p>
+            <p>Counting System</p>
         </div>
     </aside>
 
@@ -213,7 +213,7 @@
             <div class="topbar-right">
                 <div class="status-pill">
                     <span style="width:6px;height:6px;background:currentColor;border-radius:50%;display:inline-block;"></span>
-                    AI Online
+                    Online
                 </div>
                 <div class="datetime" id="datetime">
                     <span id="time">--:--:-- --</span>
@@ -223,21 +223,21 @@
 
         <div class="stats-row">
             <div class="stat-card">
-                <div class="stat-icon icon-in">📥</div>
+                <div class="stat-icon icon-in"><i class="fa-solid fa-arrow-right-to-bracket" style="font-size: 1.2rem;"></i></div>
                 <div class="stat-info">
                     <h3>Total Entry Count</h3>
                     <p id="val-in">0</p>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon icon-out">📤</div>
+                <div class="stat-icon icon-out"><i class="fa-solid fa-arrow-right-from-bracket" style="font-size: 1.2rem;"></i></div>
                 <div class="stat-info">
                     <h3>Total Exit Count</h3>
                     <p id="val-out">0</p>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon icon-occupancy">👥</div>
+                <div class="stat-icon icon-occupancy"><i class="fa-solid fa-users" style="font-size: 1.2rem;"></i></div>
                 <div class="stat-info">
                     <h3>Currently Inside</h3>
                     <p id="val-occupancy">0</p>
@@ -266,7 +266,7 @@
                 </div>
             </div>
 
-            <div class="panel">
+            <div class="panel chart-panel">
                 <div class="panel-header"><h2>Crowd Capacity</h2></div>
                 <div class="panel-body">
                     <div class="chart-container">
@@ -275,7 +275,7 @@
                 </div>
             </div>
 
-            <div class="panel">
+            <div class="panel chart-panel">
                 <div class="panel-header">
                     <h2>Visitor Inflow Distribution</h2>
                     <select style="background:transparent;border:1px solid var(--border-color);color:var(--text-main);outline:none;padding:4px 8px;border-radius:6px;font-size:.75rem;">
@@ -289,9 +289,67 @@
                 </div>
             </div>
         </div>
+
+        <div id="settings-panel" style="display:none; text-align:center; padding: 100px; color: var(--text-muted);">
+            <i class="fa-solid fa-gear" style="font-size: 4rem; margin-bottom: 20px; color: var(--accent-orange);"></i>
+            <h2>Settings</h2>
+            <p style="margin-top: 10px;">Configuration dashboard coming in v2.2.0.</p>
+        </div>
     </main>
 
     <script>
+        // ── Tabs ──────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            function switchTab(tab) {
+                try {
+                    // Update Active State
+                    document.getElementById('nav-dashboard').classList.remove('active');
+                    document.getElementById('nav-live').classList.remove('active');
+                    document.getElementById('nav-analytics').classList.remove('active');
+                    document.getElementById('nav-settings').classList.remove('active');
+                    
+                    document.getElementById('nav-' + tab).classList.add('active');
+
+                    const stats = document.querySelector('.stats-row');
+                    const camera = document.querySelector('.camera-panel');
+                    const charts = document.querySelectorAll('.chart-panel');
+                    const settings = document.getElementById('settings-panel');
+                    const grid = document.querySelector('.content-grid');
+                    
+                    // Hide all
+                    if(stats) stats.style.display = 'none';
+                    if(camera) camera.style.display = 'none';
+                    if(settings) settings.style.display = 'none';
+                    if(grid) grid.style.display = 'none';
+                    charts.forEach(c => c.style.display = 'none');
+
+                    // Show selected
+                    if (tab === 'dashboard') {
+                        if(stats) stats.style.display = 'grid';
+                        if(grid) { grid.style.display = 'grid'; grid.style.gridTemplateColumns = '2.2fr 1fr'; }
+                        if(camera) camera.style.display = 'flex';
+                        charts.forEach(c => c.style.display = 'flex');
+                    } else if (tab === 'live') {
+                        if(grid) { grid.style.display = 'grid'; grid.style.gridTemplateColumns = '1fr'; }
+                        if(camera) camera.style.display = 'flex';
+                    } else if (tab === 'analytics') {
+                        if(stats) stats.style.display = 'grid';
+                        if(grid) { grid.style.display = 'grid'; grid.style.gridTemplateColumns = '1fr 1fr'; }
+                        charts.forEach(c => c.style.display = 'flex');
+                    } else if (tab === 'settings') {
+                        if(settings) settings.style.display = 'block';
+                    }
+                } catch(e) {
+                    console.error("Tab switch error", e);
+                }
+            }
+
+            document.getElementById('nav-dashboard').addEventListener('click', () => switchTab('dashboard'));
+            document.getElementById('nav-live').addEventListener('click', () => switchTab('live'));
+            document.getElementById('nav-analytics').addEventListener('click', () => switchTab('analytics'));
+            document.getElementById('nav-settings').addEventListener('click', () => switchTab('settings'));
+        });
+
         // ── Dynamic stream URL ────────────────────────────────────────────────
         // Build the video-feed URL from the current host so the dashboard
         // works when accessed from any machine on the network.

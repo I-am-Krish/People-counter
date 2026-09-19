@@ -31,6 +31,7 @@ from config import (
     MINIMUM_MATCHING_THRESHOLD,
     RTSP_URLS,
     STREAM_PORT,
+    ANALYTICS_PORT,
     TRACK_ACTIVATION_THRESHOLD,
 )
 from dual_line_counter import SingleLineCounter

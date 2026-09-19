@@ -22,6 +22,8 @@ from flask import Flask, Response, jsonify, render_template
 from config import ANALYTICS_PORT, DB_PATH
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 
 # ─── DB HELPER ───────────────────────────────────────────────────────────────
@@ -38,7 +40,12 @@ def get_db_connection():
 
 @app.route("/")
 def index():
-    return render_template("analytics.html")
+    from flask import make_response
+    resp = make_response(render_template("analytics.html"))
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Expires'] = '0'
+    return resp
 
 
 @app.route("/api/stats")
