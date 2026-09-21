@@ -7,7 +7,6 @@
 ![RF-DETR](https://img.shields.io/badge/RF--DETR-Object%20Detection-blueviolet)
 ![ByteTrack](https://img.shields.io/badge/ByteTrack-Multi--Object%20Tracking-orange)
 ![Flask](https://img.shields.io/badge/Flask-Web%20Dashboard-lightgrey?logo=flask)
-![License](https://img.shields.io/badge/License-MIT-green)
 
 **Production-deployed AI people counter that has tracked over 50,000+ people with 85%+ accuracy.**
 
